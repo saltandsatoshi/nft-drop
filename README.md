@@ -1,17 +1,21 @@
 ## $SALTY Merkle Drop
 
-This repo contains scripts + data used to merkle drop $SALTY to the earliest community members.
-
-169 addresses can claim 138 $SALTY each, enough $SALTY for them and a friend to access the official saltandsatoshi permissioned [Discord](https://discord.gg/ruzPsVSZs).
+This repo contains scripts + data used to merkle drop the saltandsatoshi NFT for sending 69 $SALTY to a friend, and users that purchased the BTC hoodie.
 
 ### Todo
-* [x] Add addresses with claimable balances
-* [x] Update images and spinning gif to `frontend/public/manifest.json`
-* [x] Update `frontend/src/data/constants.js`
-* [x] Update `frontend/src/components/airdrop/index.js`
-* [x] Update `frontend/src/components/footer/medias.js`
-* [x] Update sources on `frontend/src/components/footer/Footer.js`
-* [x] Update sources on `frontend/src/services/airdrop_contract.ts`
-* [x] Add relevant sources to `frontend/src/components/footer/medias.js`
-* [x] Update imports using dotenv & .env
-* [x] Deploy contracts
+* [ ] Decide if we include ETH hoodie buyers in the drop
+* [ ] Fetch addreses involved in BTC hoodie purchases
+* [ ] Compile BTC hoodie addresses w/ 69 $SALTY senders
+* [ ] Create 
+* [ ] Update front end to send ERC721s instead of ERC20s
+    * [ ] Test
+* [ ] Deploy claims contract
+* [ ] Deploy NFTs to mainnet and send to claims contract
+* [ ] Display NFT in front end
+* [ ] Update `frontend/src/data/constants.js`
+* [ ] Update `frontend/src/components/airdrop/index.js`
+* [ ] Update `frontend/src/components/footer/medias.js`
+* [ ] Update sources on `frontend/src/components/footer/Footer.js`
+* [ ] Update sources on `frontend/src/services/airdrop_contract.ts`
+* [ ] Add relevant sources to `frontend/src/components/footer/medias.js`
+* [ ] Update imports using dotenv & .env
