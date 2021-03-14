@@ -4,9 +4,9 @@ This repo contains scripts + data used to merkle drop the saltandsatoshi NFT for
 
 ### Todo
 * [ ] Decide if we include ETH hoodie buyers in the drop
-* [ ] Fetch addreses involved in BTC hoodie purchases
+* [ ] Fetch addresses involved in BTC hoodie purchases
+    * [ ] Get address of BTC hoodie auction
 * [ ] Compile BTC hoodie addresses w/ 69 $SALTY senders
-* [ ] Create 
 * [ ] Update front end to send ERC721s instead of ERC20s
     * [ ] Test
 * [ ] Deploy claims contract
@@ -19,3 +19,4 @@ This repo contains scripts + data used to merkle drop the saltandsatoshi NFT for
 * [ ] Update sources on `frontend/src/services/airdrop_contract.ts`
 * [ ] Add relevant sources to `frontend/src/components/footer/medias.js`
 * [ ] Update imports using dotenv & .env
+* [ ] Draft (Medium?) announcement of NFT drop
