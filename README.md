@@ -3,9 +3,10 @@
 This repo contains scripts + data used to merkle drop the saltandsatoshi NFT for sending 69 $SALTY to a friend, and users that purchased the BTC hoodie.
 
 ### Todo
-* [ ] Decide if we include ETH hoodie buyers in the drop
+* [x] Decide if we include ETH hoodie buyers in the drop
+    * [x] Export addresses who purchased ETH hoodies
 * [x] Fetch addresses involved in BTC hoodie purchases
-    * [x] Get address of BTC hoodie auction
+    * [x] Export addresses who purchased BTC hoodies
 * [x] Compile BTC hoodie addresses w/ 69 $SALTY senders
 * [ ] Figure out if `..._flat.sol` file is needed
 * [ ] Update front end to send ERC115s instead of ERC20s
