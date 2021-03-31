@@ -7,10 +7,12 @@ This repo contains scripts + data used to merkle drop the saltandsatoshi NFT for
 * [x] Fetch addresses involved in BTC hoodie purchases
     * [x] Get address of BTC hoodie auction
 * [x] Compile BTC hoodie addresses w/ 69 $SALTY senders
-* [ ] Update front end to send ERC721s instead of ERC20s
+* [ ] Figure out if `..._flat.sol` file is needed
+* [ ] Update front end to send ERC115s instead of ERC20s
     * [ ] Test
-* [ ] Deploy claims contract
-* [ ] Deploy NFTs to mainnet and send to claims contract
+* [ ] Deployment
+    * [ ] Deploy claims contract
+    * [ ] setApprovalForAll() from SaltDAO address to claims contract
 * [ ] Display NFT in front end
 * [ ] Update `frontend/src/data/constants.js`
 * [ ] Update `frontend/src/components/airdrop/index.js`

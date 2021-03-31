@@ -3,19 +3,21 @@ pragma solidity >= 0.6.0 <0.8.0;
 
 import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 import "./I_MerkleDistributor.sol";
-import "./I_ERC721.sol";
+import "./I_ERC1155.sol";
 
 contract MerkleDistributor is I_MerkleDistributor {
 
     uint256 public nftId = 0;
-    address public immutable override nft;
+    // Address of deployed erc-1155 contract
+    address public immutable nft = 0x221615166bb370628c273961358a102cd364a67b;
+    // Address of erc1155 token holder
+    address public immutable saltDAO = 0xd362db73b59a824558ffebdfc83073f9e364dbc6;
     bytes32 public immutable override merkleRoot;
 
     // This is a packed array of booleans.
     mapping(uint256 => uint256) private claimedBitMap;
 
-    constructor(address _nft, bytes32 _merkleRoot) public {
-        nft = _nft;
+    constructor(bytes32 _merkleRoot) public {
         merkleRoot = _merkleRoot;
     }
 
@@ -42,7 +44,7 @@ contract MerkleDistributor is I_MerkleDistributor {
         require(MerkleProof.verify(merkleProof, merkleRoot, node), 'MerkleDistributor: Invalid proof.');
 
         // Send the NFT
-        require(I_ERC721(nft)).transferFrom(address(this), account, ++nftId, 'MerkleDistributor: TransferFrom failed');
+        I_ERC1155(nft).safeTransferFrom(saltDAO, account, +++nftId, 1, '');
 
         // Mark address as claimed
         _setClaimed(index);
