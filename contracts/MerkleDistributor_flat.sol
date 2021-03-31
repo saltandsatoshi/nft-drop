@@ -54,8 +54,8 @@ interface I_MerkleDistributor {
 }
 
 contract MerkleDistributor is I_MerkleDistributor {
-    address public immutable override token;
-    bytes32 public immutable override merkleRoot;
+    address public override token;
+    bytes32 public override merkleRoot;
 
     // This is a packed array of booleans.
     mapping(uint256 => uint256) private claimedBitMap;

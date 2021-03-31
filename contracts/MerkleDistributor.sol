@@ -8,16 +8,17 @@ import "./I_ERC1155.sol";
 contract MerkleDistributor is I_MerkleDistributor {
 
     uint256 public nftId = 0;
+    // address public immutable nft = 0x221615166bb370628c273961358a102cd364a67b;
     // Address of deployed erc-1155 contract
-    address public immutable nft = 0x221615166bb370628c273961358a102cd364a67b;
-    // Address of erc1155 token holder
-    address public immutable saltDAO = 0xd362db73b59a824558ffebdfc83073f9e364dbc6;
-    bytes32 public immutable override merkleRoot;
+    address public saltDAO = 0xd362db73b59A824558fFeBDFC83073F9E364dbc6;
+    address public override token;
+    bytes32 public override merkleRoot;
 
     // This is a packed array of booleans.
     mapping(uint256 => uint256) private claimedBitMap;
 
-    constructor(bytes32 _merkleRoot) public {
+    constructor(address _token, bytes32 _merkleRoot) public {
+        token = _token;
         merkleRoot = _merkleRoot;
     }
 
@@ -44,11 +45,11 @@ contract MerkleDistributor is I_MerkleDistributor {
         require(MerkleProof.verify(merkleProof, merkleRoot, node), 'MerkleDistributor: Invalid proof.');
 
         // Send the NFT
-        I_ERC1155(nft).safeTransferFrom(saltDAO, account, +++nftId, 1, '');
+        I_ERC1155(token).safeTransferFrom(saltDAO, account, ++nftId, 1, '');
 
         // Mark address as claimed
         _setClaimed(index);
         
-        emit Claimed(index, account, idCount);
+        emit Claimed(index, account, nftId);
     }
 }

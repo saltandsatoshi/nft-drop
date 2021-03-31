@@ -1,11 +1,11 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.6.0;
 
 import '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 
 // NOTE: based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/mocks/ERC1155Mock.sol
 contract TestERC1155 is ERC1155 {
     
-    constructor (string memory uri) ERC1155(uri) {
+    constructor (string memory uri) ERC1155(uri) public {
         // solhint-disable-previous-line no-empty-blocks
     }
 

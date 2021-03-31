@@ -17,5 +17,5 @@ interface I_MerkleDistributor {
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external;
 
     /// @dev This event is triggered whenever a call to #claim succeeds.
-    event Claimed(uint256 index, address account, uint256 amount);
+    event Claimed(uint256 index, address account, uint256 nftId);
 }
