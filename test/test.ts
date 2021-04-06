@@ -68,35 +68,34 @@ describe('MerkleDistributor', () => {
         ])
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
         // Mint batch of tokens - NOTE: See TEST_ERC1155.sol for argument information
-        await token.mintBatch(wallet0, [1,2], [1,1], '')
+        await token.mintBatch(wallet0.address, [1,2], [BigNumber.from(1),BigNumber.from(1)], "")
         // TODO: approveAll(?)
       })
 
       it('successful claim', async () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
-        await expect(distributor.claim(0, wallet1.address, 100, proof0, overrides))
+        await expect(distributor.claim(0, wallet1.address, 1, proof0, overrides))
           .to.emit(distributor, 'Claimed')
           .withArgs(0, wallet1.address, 1)
         const proof1 = tree.getProof(1, wallet2.address, BigNumber.from(1))
-        await expect(distributor.claim(1, wallet2.address, 101, proof1, overrides))
+        await expect(distributor.claim(1, wallet2.address, 1, proof1, overrides))
           .to.emit(distributor, 'Claimed')
           .withArgs(1, wallet2.address, 2)
       })
 
       it('transfers the token', async () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
-        // TODO: check balanceOf()
-        expect(await token.balanceOf(wallet1.address)).to.eq(0)
-        await distributor.claim(0, wallet1.address, 100, proof0, overrides)
-        expect(await token.balanceOf(wallet1.address)).to.eq(100)
+        expect(await token.balanceOf(wallet1.address, 1)).to.eq(0)
+        await distributor.claim(0, wallet1.address, 1, proof0, overrides)
+        expect(await token.balanceOf(wallet1.address, 1)).to.eq(1)
       })
 
       it('must have enough to transfer', async () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
         await token.burnBatch(wallet0, [1,2], [1,1], '');
         // await token.setBalance(distributor.address, 99)
-        await expect(distributor.claim(0, wallet1.address, 100, proof0, overrides)).to.be.revertedWith(
-          'ERC20: transfer amount exceeds balance'
+        await expect(distributor.claim(0, wallet1.address, 1, proof0, overrides)).to.be.revertedWith(
+          'ERC1155: transfer amount exceeds balance'
         )
       })
 
@@ -184,7 +183,7 @@ describe('MerkleDistributor', () => {
         )
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
         // await token.setBalance(distributor.address, 201)
-        await token.mintBatch(wallet0, [1,2,3,4,5,6,7,8,9,10], [1,1,1,1,1,1,1,1,1,1], '')
+        await token.mintBatch(wallet0.address, [1,2,3,4,5,6,7,8,9,10], [1,1,1,1,1,1,1,1,1,1], '')
         // TODO: approveAll
       })
 
@@ -229,7 +228,7 @@ describe('MerkleDistributor', () => {
       beforeEach('deploy', async () => {
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
         // await token.setBalance(distributor.address, constants.MaxUint256)
-        await token.mintBatch(wallet0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], '')
+        await token.mintBatch(wallet0.address, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], '')
         // TODO: approveAll()
       })
       it('no double claims in random distribution', async () => {
@@ -259,11 +258,11 @@ describe('MerkleDistributor', () => {
         [wallet1.address]: 1,
         [wallets[2].address]: 1,
       })
-      expect(tokenTotal).to.eq('0x3') // 3
+      expect(tokenTotal).to.eq('0x03') // 3
       claims = innerClaims
       distributor = await deployContract(wallet0, Distributor, [token.address, merkleRoot], overrides)
       // await token.setBalance(distributor.address, tokenTotal)
-      await token.mintBatch(wallet0, [1,2,3], [1,1,1], '');
+      await token.mintBatch(wallet0.address, [1,2,3], [1,1,1], '');
       // TODO: approveBatch()
     })
 
