@@ -68,8 +68,9 @@ describe('MerkleDistributor', () => {
         ])
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
         // Mint batch of tokens - NOTE: See TEST_ERC1155.sol for argument information
-        await token.mintBatch(wallet0.address, [1,2], [BigNumber.from(1),BigNumber.from(1)], "")
-        // TODO: approveAll(?)
+        await token.mintBatch(wallet0.address, [1,2], [BigNumber.from(1),BigNumber.from(1)], "0x00")
+        // Approve wallet0 to send the erc1155 tokens to claimers
+        await token.setApprovalForAll(wallet0.address, true)        
       })
 
       it('successful claim', async () => {
@@ -182,9 +183,9 @@ describe('MerkleDistributor', () => {
           })
         )
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
-        // await token.setBalance(distributor.address, 201)
-        await token.mintBatch(wallet0.address, [1,2,3,4,5,6,7,8,9,10], [1,1,1,1,1,1,1,1,1,1], '')
-        // TODO: approveAll
+
+        await token.mintBatch(wallet0.address, [1,2,3,4,5,6,7,8,9,10], [1,1,1,1,1,1,1,1,1,1], '0x00')
+        await token.setApprovalForAll(wallet0.address, true)
       })
 
       it('claim index 4', async () => {
@@ -228,7 +229,9 @@ describe('MerkleDistributor', () => {
       beforeEach('deploy', async () => {
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
         // await token.setBalance(distributor.address, constants.MaxUint256)
-        await token.mintBatch(wallet0.address, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], '')
+        await token.mintBatch(wallet0.address, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], '0x00')
+        await token.setApprovalForAll(wallet0.address, true)
+
         // TODO: approveAll()
       })
       it('no double claims in random distribution', async () => {
@@ -262,8 +265,8 @@ describe('MerkleDistributor', () => {
       claims = innerClaims
       distributor = await deployContract(wallet0, Distributor, [token.address, merkleRoot], overrides)
       // await token.setBalance(distributor.address, tokenTotal)
-      await token.mintBatch(wallet0.address, [1,2,3], [1,1,1], '');
-      // TODO: approveBatch()
+      await token.mintBatch(wallet0.address, [1,2,3], [1,1,1], '0x00');
+      await token.setApprovalForAll(wallet0.address, true)
     })
 
     // TODO: validate proofs
@@ -271,23 +274,23 @@ describe('MerkleDistributor', () => {
       expect(claims).to.deep.eq({
         [wallet0.address]: {
           index: 0,
-          amount: '0x1',
-          proof: ['0x2a411ed78501edb696adca9e41e78d8256b61cfac45612fa0434d7cf87d916c6'],
+          amount: '0x01',
+          proof: ['0x1c1de3d8934bf14f7f3cd1f0bc5e29e4d3e897931acb98408369b9ea82f119a3'],
         },
         [wallet1.address]: {
           index: 1,
-          amount: '0x1',
+          amount: '0x01',
           proof: [
-            '0xbfeb956a3b705056020a3b64c540bff700c0f6c96c55c0a5fcab57124cb36f7b',
-            '0xd31de46890d4a77baeebddbd77bf73b5c626397b73ee8c69b51efe4c9a5a72fa',
+            '0x60c8a8ae68b05c4d47e80a80c5fa77ca19925f1d62b6f573d3ff3b2f396ec424',
+            '0xe856977c80afb96a13660fbc56b632fe7ace5a15c7ed11d51e48ede138c0908e',
           ],
         },
         [wallets[2].address]: {
           index: 2,
-          amount: '0x1',
+          amount: '0x01',
           proof: [
-            '0xceaacce7533111e902cc548e961d77b23a4d8cd073c6b68ccf55c62bd47fc36b',
-            '0xd31de46890d4a77baeebddbd77bf73b5c626397b73ee8c69b51efe4c9a5a72fa',
+            '0x85e6a399a5e8296a055e7723d96926edc336fb19a661b6ecfae820ef109d1709',
+            '0xe856977c80afb96a13660fbc56b632fe7ace5a15c7ed11d51e48ede138c0908e',
           ],
         },
       })
