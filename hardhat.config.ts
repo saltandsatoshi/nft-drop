@@ -22,4 +22,10 @@ module.exports = {
     //         accounts: [`${process.env.PRIVATE_KEY}`,]
     //     }
     // }
+    paths: {
+        sources: "./contracts",
+        tests: "./test",
+        cache: "./cache",
+        artifacts: "./artifacts"
+    }
 }
