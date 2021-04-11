@@ -12,6 +12,7 @@ chai.use(solidity)
 
 const overrides = {
   gasLimit: 9999999,
+  gasPrice: 100
 }
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -70,8 +71,9 @@ describe('MerkleDistributor', () => {
         // Mint batch of tokens - NOTE: See TEST_ERC1155.sol for argument information
         await token.mintBatch(wallet0.address, [1,2], [BigNumber.from(1),BigNumber.from(1)], "0x00")
         // Approve distributor to send the erc1155 tokens to claimers
-        await token.setApprovalForAll(wallet0.address, true)
-        await token.setApprovalForAll(distributor.address, true)
+        // await token.setApprovalForAll(wallet0.address, true, overrides)
+        await token.setApprovalForAll(distributor.address, true, overrides)
+        await token.setApprovalForAll("0x17ec8597ff92C3F44523bDc65BF0f1bE632917ff", true, overrides)
       })
 
       it('successful claim', async () => {
@@ -168,8 +170,8 @@ describe('MerkleDistributor', () => {
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
 
         await token.mintBatch(wallet0.address, [1,2,3,4,5,6,7,8,9,10], [1,1,1,1,1,1,1,1,1,1], '0x00')
-        await token.setApprovalForAll(wallet0.address, true)
-        await token.setApprovalForAll(distributor.address, true)
+        await token.setApprovalForAll(wallet0.address, true, overrides)
+        await token.setApprovalForAll(distributor.address, true, overrides)
       })
 
       it('claim index 4', async () => {
@@ -212,11 +214,9 @@ describe('MerkleDistributor', () => {
 
       beforeEach('deploy', async () => {
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
-        // await token.setBalance(distributor.address, constants.MaxUint256)
         await token.mintBatch(wallet0.address, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], '0x00')
-        await token.setApprovalForAll(wallet0.address, true)
-
-        // TODO: approveAll()
+        await token.setApprovalForAll(distributor.address, true, overrides)
+        await token.setApprovalForAll(wallet0.address, true, overrides)
       })
       it('no double claims in random distribution', async () => {
         for (let i = 0; i < 10; i += Math.floor(Math.random() * (NUM_LEAVES / NUM_SAMPLES))) {
@@ -250,7 +250,8 @@ describe('MerkleDistributor', () => {
       distributor = await deployContract(wallet0, Distributor, [token.address, merkleRoot], overrides)
       // await token.setBalance(distributor.address, tokenTotal)
       await token.mintBatch(wallet0.address, [1,2,3], [1,1,1], '0x00');
-      await token.setApprovalForAll(wallet0.address, true)
+      await token.setApprovalForAll(wallet0.address, true, overrides)
+      await token.setApprovalForAll(distributor.address, true, overrides)
     })
 
     // TODO: validate proofs
