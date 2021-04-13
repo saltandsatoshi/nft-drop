@@ -12,6 +12,7 @@ chai.use(solidity)
 
 const overrides = {
   gasLimit: 9999999,
+  gasPrice: 100
 }
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -69,17 +70,19 @@ describe('MerkleDistributor', () => {
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
         // Mint batch of tokens - NOTE: See TEST_ERC1155.sol for argument information
         await token.mintBatch(wallet0.address, [1,2], [BigNumber.from(1),BigNumber.from(1)], "0x00")
-        // Approve wallet0 to send the erc1155 tokens to claimers
-        await token.setApprovalForAll(wallet0.address, true)        
+        // Approve distributor to send the erc1155 tokens to claimers
+        // await token.setApprovalForAll(wallet0.address, true, overrides)
+        await token.setApprovalForAll(distributor.address, true, overrides)
+        await token.setApprovalForAll("0x17ec8597ff92C3F44523bDc65BF0f1bE632917ff", true, overrides)
       })
 
       it('successful claim', async () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
-        await expect(distributor.claim(0, wallet1.address, 1, proof0, overrides))
+        await expect(distributor.claim(0, wallet1.address, BigNumber.from(1), proof0, overrides))
           .to.emit(distributor, 'Claimed')
           .withArgs(0, wallet1.address, 1)
         const proof1 = tree.getProof(1, wallet2.address, BigNumber.from(1))
-        await expect(distributor.claim(1, wallet2.address, 1, proof1, overrides))
+        await expect(distributor.claim(1, wallet2.address, BigNumber.from(1), proof1, overrides))
           .to.emit(distributor, 'Claimed')
           .withArgs(1, wallet2.address, 2)
       })
@@ -87,15 +90,15 @@ describe('MerkleDistributor', () => {
       it('transfers the token', async () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
         expect(await token.balanceOf(wallet1.address, 1)).to.eq(0)
-        await distributor.claim(0, wallet1.address, 1, proof0, overrides)
+        await distributor.claim(0, wallet1.address, 1, proof0)
         expect(await token.balanceOf(wallet1.address, 1)).to.eq(1)
       })
 
       it('must have enough to transfer', async () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
-        await token.burnBatch(wallet0, [1,2], [1,1], '');
+        await token.burnBatch(wallet0.address, [1,2], [1,1]);
         // await token.setBalance(distributor.address, 99)
-        await expect(distributor.claim(0, wallet1.address, 1, proof0, overrides)).to.be.revertedWith(
+        await expect(distributor.claim(0, wallet1.address, 1, proof0)).to.be.revertedWith(
           'ERC1155: transfer amount exceeds balance'
         )
       })
@@ -104,34 +107,22 @@ describe('MerkleDistributor', () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
         expect(await distributor.isClaimed(0)).to.eq(false)
         expect(await distributor.isClaimed(1)).to.eq(false)
-        await distributor.claim(0, wallet1.address, 100, proof0, overrides)
+        await distributor.claim(0, wallet1.address, 100, proof0)
         expect(await distributor.isClaimed(0)).to.eq(true)
         expect(await distributor.isClaimed(1)).to.eq(false)
       })
 
       it('cannot allow two claims', async () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
-        await distributor.claim(0, wallet1.address, 1, proof0, overrides)
-        await expect(distributor.claim(0, wallet1.address, 1, proof0, overrides)).to.be.revertedWith(
+        await distributor.claim(0, wallet1.address, 1, proof0)
+        await expect(distributor.claim(0, wallet1.address, 1, proof0)).to.be.revertedWith(
           'MerkleDistributor: Drop already claimed.'
         )
       })
 
       it('cannot claim more than once: 0 and then 1', async () => {
-        await distributor.claim(
-          0,
-          wallet0.address,
-          1,
-          tree.getProof(0, wallet0.address, BigNumber.from(1)),
-          overrides
-        )
-        await distributor.claim(
-          1,
-          wallet1.address,
-          101,
-          tree.getProof(1, wallet1.address, BigNumber.from(1)),
-          overrides
-        )
+        await distributor.claim(0, wallet1.address, 1, tree.getProof(0, wallet1.address, BigNumber.from(1)), overrides)
+        await distributor.claim(1, wallet2.address, 1, tree.getProof(1, wallet2.address, BigNumber.from(1)), overrides)
 
         await expect(
           distributor.claim(0, wallet1.address, 1, tree.getProof(0, wallet1.address, BigNumber.from(1)), overrides)
@@ -146,13 +137,7 @@ describe('MerkleDistributor', () => {
           tree.getProof(1, wallet2.address, BigNumber.from(1)),
           overrides
         )
-        await distributor.claim(
-          0,
-          wallet1.address,
-          1,
-          tree.getProof(0, wallet1.address, BigNumber.from(1)),
-          overrides
-        )
+        await distributor.claim(0, wallet1.address, 1, tree.getProof(0, wallet1.address, BigNumber.from(1)), overrides)
 
         await expect(
           distributor.claim(1, wallet2.address, 1, tree.getProof(1, wallet2.address, BigNumber.from(1)), overrides)
@@ -185,7 +170,8 @@ describe('MerkleDistributor', () => {
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
 
         await token.mintBatch(wallet0.address, [1,2,3,4,5,6,7,8,9,10], [1,1,1,1,1,1,1,1,1,1], '0x00')
-        await token.setApprovalForAll(wallet0.address, true)
+        await token.setApprovalForAll(wallet0.address, true, overrides)
+        await token.setApprovalForAll(distributor.address, true, overrides)
       })
 
       it('claim index 4', async () => {
@@ -228,17 +214,15 @@ describe('MerkleDistributor', () => {
 
       beforeEach('deploy', async () => {
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
-        // await token.setBalance(distributor.address, constants.MaxUint256)
         await token.mintBatch(wallet0.address, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], '0x00')
-        await token.setApprovalForAll(wallet0.address, true)
-
-        // TODO: approveAll()
+        await token.setApprovalForAll(distributor.address, true, overrides)
+        await token.setApprovalForAll(wallet0.address, true, overrides)
       })
       it('no double claims in random distribution', async () => {
         for (let i = 0; i < 10; i += Math.floor(Math.random() * (NUM_LEAVES / NUM_SAMPLES))) {
           const proof = tree.getProof(i, wallet0.address, BigNumber.from(1))
           await distributor.claim(i, wallet0.address, 1, proof, overrides)
-          await expect(distributor.claim(i, wallet0.address, 1, proof, overrides)).to.be.revertedWith(
+          await expect(distributor.claim(i, wallet0.address, 1, proof)).to.be.revertedWith(
             'MerkleDistributor: Drop already claimed.'
           )
         }
@@ -266,7 +250,8 @@ describe('MerkleDistributor', () => {
       distributor = await deployContract(wallet0, Distributor, [token.address, merkleRoot], overrides)
       // await token.setBalance(distributor.address, tokenTotal)
       await token.mintBatch(wallet0.address, [1,2,3], [1,1,1], '0x00');
-      await token.setApprovalForAll(wallet0.address, true)
+      await token.setApprovalForAll(wallet0.address, true, overrides)
+      await token.setApprovalForAll(distributor.address, true, overrides)
     })
 
     // TODO: validate proofs
