@@ -1,19 +1,20 @@
 .env
 artifacts/*
 build/*
+frontend/build/*
+
 
 # dependencies
 package-lock.json
 node_modules
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 
 # testing
-/coverage
+coverage/*
 
 # production
-/frontend/build
 
 # misc
 .DS_Store
