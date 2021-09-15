@@ -1,7 +1,9 @@
 import chai, { expect } from 'chai'
 import { solidity, MockProvider, deployContract } from 'ethereum-waffle'
-import { Contract, BigNumber, constants } from 'ethers'
+// import { Contract, BigNumber, constants } from 'ethers'
+// import {Contract, BigNumber } from '@nomiclabs/hardhat-ethers'
 import BalanceTree from '../src/balance-tree'
+
 
 import Distributor from '../build/MerkleDistributor.json'
 // TODO: import
@@ -29,7 +31,7 @@ describe('MerkleDistributor', () => {
   })
 
   const wallets = provider.getWallets()
-  const [wallet0, wallet1, wallet2] = wallets
+  const [wallet0, wallet1, wallet2, wallet3 ] = wallets
 
   let token: Contract
   beforeEach('deploy token', async () => {
@@ -69,20 +71,20 @@ describe('MerkleDistributor', () => {
         ])
         distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
         // Mint batch of tokens - NOTE: See TEST_ERC1155.sol for argument information
-        await token.mintBatch(wallet0.address, [1,2], [BigNumber.from(1),BigNumber.from(1)], "0x00", overrides)
+        await token.mintBatch(wallet2.address, [1,2], [BigNumber.from(1),BigNumber.from(1)], "0x00", overrides)
         // Approve distributor to send the erc1155 tokens to claimers
-        // await token.setApprovalForAll(wallet0.address, true, overrides)
+        await token.setApprovalForAll(wallet1.address, true, overrides)
         await token.setApprovalForAll(distributor.address, true, overrides)
         // await token.setApprovalForAll("0x17ec8597ff92C3F44523bDc65BF0f1bE632917ff", true, overrides)
       })
 
       it('successful claim', async () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
-        await expect(distributor.claim(0, wallet1.address, BigNumber.from(1), proof0, overrides))
+        await expect(distributor.claim(0, wallet1.address, 1, proof0, overrides))
           .to.emit(distributor, 'Claimed')
           .withArgs(0, wallet1.address, 1)
         const proof1 = tree.getProof(1, wallet2.address, BigNumber.from(1))
-        await expect(distributor.claim(1, wallet2.address, BigNumber.from(1), proof1, overrides))
+        await expect(distributor.claim(1, wallet2.address, 1, proof1, overrides))
           .to.emit(distributor, 'Claimed')
           .withArgs(1, wallet2.address, 2)
       })
@@ -107,7 +109,7 @@ describe('MerkleDistributor', () => {
         const proof0 = tree.getProof(0, wallet1.address, BigNumber.from(1))
         expect(await distributor.isClaimed(0)).to.eq(false)
         expect(await distributor.isClaimed(1)).to.eq(false)
-        await distributor.claim(0, wallet1.address, 100, proof0, overrides)
+        await distributor.claim(0, wallet1.address, 1, proof0, overrides)
         expect(await distributor.isClaimed(0)).to.eq(true)
         expect(await distributor.isClaimed(1)).to.eq(false)
       })
@@ -167,7 +169,7 @@ describe('MerkleDistributor', () => {
             return { account: wallet.address, amount: BigNumber.from(1) }
           })
         )
-        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
+        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot(), wallet0.address], overrides)
 
         await token.mintBatch(wallet0.address, [1,2,3,4,5,6,7,8,9,10], [1,1,1,1,1,1,1,1,1,1], '0x00', overrides)
         await token.setApprovalForAll(wallet0.address, true, overrides)
@@ -213,7 +215,7 @@ describe('MerkleDistributor', () => {
       })
 
       beforeEach('deploy', async () => {
-        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
+        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot(), wallet0.address], overrides)
         await token.mintBatch(wallet0.address, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], '0x00', overrides)
         await token.setApprovalForAll(distributor.address, true, overrides)
         await token.setApprovalForAll(wallet0.address, true, overrides)
@@ -247,7 +249,7 @@ describe('MerkleDistributor', () => {
       })
       expect(tokenTotal).to.eq('0x03') // 3
       claims = innerClaims
-      distributor = await deployContract(wallet0, Distributor, [token.address, merkleRoot], overrides)
+      distributor = await deployContract(wallet0, Distributor, [token.address, merkleRoot, wallet0.address], overrides)
       // await token.setBalance(distributor.address, tokenTotal)
       await token.mintBatch(wallet0.address, [1,2,3], [1,1,1], '0x00', overrides);
       await token.setApprovalForAll(wallet0.address, true, overrides)

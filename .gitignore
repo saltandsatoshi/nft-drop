@@ -1,4 +1,6 @@
 .env
+artifacts/*
+build/*
 
 # dependencies
 node_modules
